@@ -9,42 +9,40 @@ import numpy as np
 
 
 def main():
-    data = pd.read_csv("product_images.csv")
+    data = pd.read_csv("product_images.csv")  # Load the product images and labels
 
+    labels = data["label"]  # Keep only the labels
+    feature_vectors = data.drop("label", axis=1)  # Keep the pixel values
+    print(labels.head())
+    print(type(labels))
+    print(feature_vectors.head())
+    print(type(feature_vectors))
 
-    figures = []
-    for index, row in data.iterrows():
-        figures.append(plt.imshow(row[1:].to_numpy().reshape(28, 28)))
-
-        if index == 10:
-            break
-
-    print(type(figures[0]))
-    # figures[0].show()
-    # print("FIGURE:", figures[0])
-    # Try doing it liek the other oen.... except that we convert the data into a numpy array with rows and then that into the pictures stuff
-    plt.show()
-    raise SystemExit
-
-
-    labels = data["label"]
-    print(labels)
-
-    print(plt.hist)
-    plt.figure(20).show()
-
-
-
+    # Print amount of each type of images
     print("There are:"
           "\n\t%d images of sneakers"
           "\n\t%d images of ankle boots"
-          % (data["label"][data["label"] == 0].size,
-             data["label"][data["label"] == 1].size)
+          % (labels[labels == 0].size,
+             labels[labels == 1].size)
           )
 
-    # plt.imshow(data[1, data[1:]].reshape(28, 28))
-    #
-    # print(data)
+    # Get and show first sneaker
+    plt.imshow(np.array(feature_vectors.iloc[labels[labels == 0].index[0]]).reshape(28, 28))
+    plt.show()
+
+    # Get and show first ankle boot
+    plt.imshow(np.array(feature_vectors.iloc[labels[labels == 1].index[0]]).reshape(28, 28))
+    plt.show()
+
+    # Parameterised data
+    feature_vectors_parameterised = feature_vectors.sample(400)
+    labels_parameterised = labels[feature_vectors_parameterised.index]
+    print("Parameterised dataset contains:"
+          "\n\t%d images of sneakers"
+          "\n\t%d images of ankle boots"
+          % (labels_parameterised[labels_parameterised == 0].size,
+             labels_parameterised[labels_parameterised == 1].size)
+          )
 
 
 main()
