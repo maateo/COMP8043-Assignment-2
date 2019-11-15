@@ -240,7 +240,7 @@ def main():
         print("\t\t\t# Minimum: ", min(radial_basis_function_prediction_times))
         print("\t\t\t# Maximum: ", max(radial_basis_function_prediction_times))
         print("\t\t\t# Average: ", np.mean(radial_basis_function_prediction_times))
-        print("\t\t### Prediction Times (in ms) ###")
+        print("\t\t### Prediction Times (in ms) per sample ###")
         print("\t\t\t# Minimum: ", np.divide(min(radial_basis_function_prediction_times), number_of_samples))
         print("\t\t\t# Maximum: ", np.divide(max(radial_basis_function_prediction_times), number_of_samples))
         print("\t\t\t# Average: ", np.divide(np.mean(radial_basis_function_prediction_times), number_of_samples))
@@ -249,10 +249,11 @@ def main():
         print("\t\t\t# Maximum: ", max(radial_basis_function_prediction_accuracies))
         print("\t\t\t# Average: ", np.mean(radial_basis_function_prediction_accuracies))
 
+    np.set_printoptions(precision=5, linewidth=200)
     print("##### Summary of gammas for radial basis function #####")
-    print("\t# Average training times for each gamma:", gamma_rbfc_average_training_times)
-    print("\t# Average predicting times for each gamma:", gamma_rbfc_average_prediction_times)
-    print("\t# Average accuracies for each gamma:", gamma_rbfc_average_accuracies)
+    print("\t# Average training times for each gamma:\t", np.array2string(np.array(gamma_rbfc_average_training_times), separator=', '))
+    print("\t# Average predicting times for each gamma:\t", np.array2string(np.array(gamma_rbfc_average_prediction_times), separator=', '))
+    print("\t# Average accuracies for each gamma:\t\t", np.array2string(np.array(gamma_rbfc_average_accuracies), separator=', '))
     print("\t# Best gamma in terms of training time:", gamma_rbfc_average_training_times.index(min(gamma_rbfc_average_training_times)) + 1)  # Min because faster is better
     print("\t# Best gamma in terms of predicting time:", gamma_rbfc_average_prediction_times.index(min(gamma_rbfc_average_prediction_times)) + 1)  # Min because faster is better
     print("\t# Best gamma in terms of accuracy:", gamma_rbfc_average_accuracies.index(max(gamma_rbfc_average_accuracies)) + 1)  # Max because we want highest accuracy possible
