@@ -22,10 +22,6 @@ def main():
 
     labels = data["label"]  # Keep only the labels
     feature_vectors = data.drop("label", axis=1)  # Keep the pixel values
-    print(labels.head())
-    print(type(labels))
-    print(feature_vectors.head())
-    print(type(feature_vectors))
 
     # Print amount of each type of images
     print("There are:"
@@ -44,7 +40,7 @@ def main():
     plt.show()
 
     # Parameterised data
-    feature_vectors_parameterised = feature_vectors.sample(6000)
+    feature_vectors_parameterised = feature_vectors.sample(3500)
     labels_parameterised = labels[feature_vectors_parameterised.index]
 
     # Print parameterised statistics
@@ -105,15 +101,15 @@ def main():
     print("### Training Times (in ms) ###")
     print("# Minimum: ", min(perceptron_training_times))
     print("# Maximum: ", max(perceptron_training_times))
-    print("# Average: ", sum(perceptron_training_times) / len(perceptron_training_times))
+    print("# Average: ", np.mean(perceptron_training_times))
     print("### Prediction Times (in ms) ###")
     print("# Minimum: ", min(perceptron_prediction_times))
     print("# Maximum: ", max(perceptron_prediction_times))
-    print("# Average: ", sum(perceptron_prediction_times) / len(perceptron_prediction_times))
+    print("# Average: ", np.mean(perceptron_prediction_times))
     print("### Accuracies ###")
     print("# Minimum: ", min(perceptron_prediction_accuracies))
     print("# Maximum: ", max(perceptron_prediction_accuracies))
-    print("# Average: ", sum(perceptron_prediction_accuracies) / len(perceptron_prediction_accuracies))
+    print("# Average: ", np.mean(perceptron_prediction_accuracies))
 
     ####################
     #####  Task 3  #####
@@ -131,89 +127,108 @@ def main():
     radial_basis_function_training_times = []
     radial_basis_function_prediction_times = []
     radial_basis_function_prediction_accuracies = []
-    current_fold = 0
+
+    gamma_rbfc_average_training_times = []
+    gamma_rbfc_average_prediction_times = []
+    gamma_rbfc_average_accuracies = []
+
     kf = model_selection.KFold(n_splits=number_of_kfolds, shuffle=True)
-    for train_index, test_index in kf.split(feature_vectors_parameterised, labels_parameterised):
-        current_fold += 1
-        feature_vectors_parameterised_train_fold = feature_vectors_parameterised.iloc[train_index]
-        feature_vectors_parameterised_test_fold = feature_vectors_parameterised.iloc[test_index]
-        labels_parameterised_train_fold = labels_parameterised.iloc[train_index]
-        labels_parameterised_test_fold = labels_parameterised.iloc[test_index]
+    for gamma in range(1, 16):
+        print("##### Gamma: %d" % gamma)
+        current_fold = 0
+        for train_index, test_index in kf.split(feature_vectors_parameterised, labels_parameterised):
+            current_fold += 1
+            feature_vectors_parameterised_train_fold = feature_vectors_parameterised.iloc[train_index]
+            feature_vectors_parameterised_test_fold = feature_vectors_parameterised.iloc[test_index]
+            labels_parameterised_train_fold = labels_parameterised.iloc[train_index]
+            labels_parameterised_test_fold = labels_parameterised.iloc[test_index]
 
-        linear_kernel_classifier = svm.SVC(kernel="linear", gamma=1e-3)
-        radial_basis_function_classifier = svm.SVC(kernel="rbf", gamma=1e-7)
+            linear_kernel_classifier = svm.SVC(kernel="linear")
+            radial_basis_function_classifier = svm.SVC(kernel="rbf", gamma=float('1e-%d' % gamma))
 
-        linear_kernel_fit_start_time = time.time()
-        linear_kernel_classifier.fit(feature_vectors_parameterised_train_fold, labels_parameterised_train_fold)
-        linear_kernel_fit_end_time = time.time()
-        radial_basis_function_fit_start_time = time.time()
-        radial_basis_function_classifier.fit(feature_vectors_parameterised_train_fold, labels_parameterised_train_fold)
-        radial_basis_function_fit_end_time = time.time()
+            linear_kernel_fit_start_time = time.time()
+            linear_kernel_classifier.fit(feature_vectors_parameterised_train_fold, labels_parameterised_train_fold)
+            linear_kernel_fit_end_time = time.time()
+            radial_basis_function_fit_start_time = time.time()
+            radial_basis_function_classifier.fit(feature_vectors_parameterised_train_fold, labels_parameterised_train_fold)
+            radial_basis_function_fit_end_time = time.time()
 
-        linear_kernel_predict_start_time = time.time()
-        linear_kernel_prediction = linear_kernel_classifier.predict(feature_vectors_parameterised_test_fold)
-        linear_kernel_predict_end_time = time.time()
-        radial_basis_function_predict_start_time = time.time()
-        radial_basis_function_prediction = radial_basis_function_classifier.predict(feature_vectors_parameterised_test_fold)
-        radial_basis_function_predict_end_time = time.time()
+            linear_kernel_predict_start_time = time.time()
+            linear_kernel_prediction = linear_kernel_classifier.predict(feature_vectors_parameterised_test_fold)
+            linear_kernel_predict_end_time = time.time()
+            radial_basis_function_predict_start_time = time.time()
+            radial_basis_function_prediction = radial_basis_function_classifier.predict(feature_vectors_parameterised_test_fold)
+            radial_basis_function_predict_end_time = time.time()
 
-        linear_kernel_accuracy_score = metrics.accuracy_score(labels_parameterised_test_fold, linear_kernel_prediction)
-        radial_basis_function_accuracy_score = metrics.accuracy_score(labels_parameterised_test_fold, radial_basis_function_prediction)
+            linear_kernel_accuracy_score = metrics.accuracy_score(labels_parameterised_test_fold, linear_kernel_prediction)
+            radial_basis_function_accuracy_score = metrics.accuracy_score(labels_parameterised_test_fold, radial_basis_function_prediction)
 
-        linear_kernel_training_times.append(linear_kernel_fit_end_time - linear_kernel_fit_start_time)
-        linear_kernel_prediction_times.append(linear_kernel_predict_end_time - linear_kernel_predict_start_time)
-        linear_kernel_prediction_accuracies.append(linear_kernel_accuracy_score)
-        radial_basis_function_training_times.append(radial_basis_function_fit_end_time - radial_basis_function_fit_start_time)
-        radial_basis_function_prediction_times.append(radial_basis_function_predict_end_time - radial_basis_function_predict_start_time)
-        radial_basis_function_prediction_accuracies.append(radial_basis_function_accuracy_score)
+            linear_kernel_training_times.append(linear_kernel_fit_end_time - linear_kernel_fit_start_time)
+            linear_kernel_prediction_times.append(linear_kernel_predict_end_time - linear_kernel_predict_start_time)
+            linear_kernel_prediction_accuracies.append(linear_kernel_accuracy_score)
+            radial_basis_function_training_times.append(radial_basis_function_fit_end_time - radial_basis_function_fit_start_time)
+            radial_basis_function_prediction_times.append(radial_basis_function_predict_end_time - radial_basis_function_predict_start_time)
+            radial_basis_function_prediction_accuracies.append(radial_basis_function_accuracy_score)
 
-        l_true_negative, l_false_positive, l_false_negative, l_true_positive = confusion_matrix(labels_parameterised_test_fold, linear_kernel_prediction).ravel()
-        rbf_true_negative, rbf_false_positive, rbf_false_negative, rbf_true_positive = confusion_matrix(labels_parameterised_test_fold, radial_basis_function_prediction).ravel()
+            l_true_negative, l_false_positive, l_false_negative, l_true_positive = confusion_matrix(labels_parameterised_test_fold, linear_kernel_prediction).ravel()
+            rbf_true_negative, rbf_false_positive, rbf_false_negative, rbf_true_positive = confusion_matrix(labels_parameterised_test_fold, radial_basis_function_prediction).ravel()
 
-        print("\t## Fold number: %d ##" % current_fold)
-        print("\t\t# Linear Kernel")
-        print("\t\t\t# Training time", linear_kernel_fit_end_time - linear_kernel_fit_start_time)
-        print("\t\t\t# Predicting time", linear_kernel_predict_end_time - linear_kernel_predict_start_time)
-        print("\t\t\t# Perceptron accuracy score: ", linear_kernel_accuracy_score)
-        print("\t\t\t# true negative", l_true_negative)
-        print("\t\t\t# false positive", l_false_positive)
-        print("\t\t\t# false negative", l_false_negative)
-        print("\t\t\t# true positive", l_true_positive)
-        print("\t\t# Radial Basis Function Kernel")
-        print("\t\t\t# Training time", radial_basis_function_fit_end_time - radial_basis_function_fit_start_time)
-        print("\t\t\t# Predicting time", radial_basis_function_predict_end_time - radial_basis_function_predict_start_time)
-        print("\t\t\t# Perceptron accuracy score: ", radial_basis_function_accuracy_score)
-        print("\t\t\t# true negative", rbf_true_negative)
-        print("\t\t\t# false positive", rbf_false_positive)
-        print("\t\t\t# false negative", rbf_false_negative)
-        print("\t\t\t# true positive", rbf_true_positive)
+            print("\t\t## Fold number: %d ##" % current_fold)
+            print("\t\t\t# Linear Kernel")
+            print("\t\t\t\t# Training time", linear_kernel_fit_end_time - linear_kernel_fit_start_time)
+            print("\t\t\t\t# Predicting time", linear_kernel_predict_end_time - linear_kernel_predict_start_time)
+            print("\t\t\t\t# Perceptron accuracy score: ", linear_kernel_accuracy_score)
+            print("\t\t\t\t# true negative", l_true_negative)
+            print("\t\t\t\t# false positive", l_false_positive)
+            print("\t\t\t\t# false negative", l_false_negative)
+            print("\t\t\t\t# true positive", l_true_positive)
+            print("\t\t\t# Radial Basis Function Kernel")
+            print("\t\t\t\t# Training time", radial_basis_function_fit_end_time - radial_basis_function_fit_start_time)
+            print("\t\t\t\t# Predicting time", radial_basis_function_predict_end_time - radial_basis_function_predict_start_time)
+            print("\t\t\t\t# Perceptron accuracy score: ", radial_basis_function_accuracy_score)
+            print("\t\t\t\t# true negative", rbf_true_negative)
+            print("\t\t\t\t# false positive", rbf_false_positive)
+            print("\t\t\t\t# false negative", rbf_false_negative)
+            print("\t\t\t\t# true positive", rbf_true_positive)
 
-    print("##### Linear Kernel")
-    print("\t### Training Times (in ms) ###")
-    print("\t\t# Minimum: ", min(linear_kernel_training_times))
-    print("\t\t# Maximum: ", max(linear_kernel_training_times))
-    print("\t\t# Average: ", sum(linear_kernel_training_times) / len(linear_kernel_training_times))
-    print("\t### Prediction Times (in ms) ###")
-    print("\t\t# Minimum: ", min(linear_kernel_prediction_times))
-    print("\t\t# Maximum: ", max(linear_kernel_prediction_times))
-    print("\t\t# Average: ", sum(linear_kernel_prediction_times) / len(linear_kernel_prediction_times))
-    print("\t### Accuracies ###")
-    print("\t\t# Minimum: ", min(linear_kernel_prediction_accuracies))
-    print("\t\t# Maximum: ", max(linear_kernel_prediction_accuracies))
-    print("\t\t# Average: ", sum(linear_kernel_prediction_accuracies) / len(linear_kernel_prediction_accuracies))
-    print("##### Radial Basis Function Kernel")
-    print("\t### Training Times (in ms) ###")
-    print("\t\t# Minimum: ", min(radial_basis_function_training_times))
-    print("\t\t# Maximum: ", max(radial_basis_function_training_times))
-    print("\t\t# Average: ", sum(radial_basis_function_training_times) / len(radial_basis_function_training_times))
-    print("\t### Prediction Times (in ms) ###")
-    print("\t\t# Minimum: ", min(radial_basis_function_prediction_times))
-    print("\t\t# Maximum: ", max(radial_basis_function_prediction_times))
-    print("\t\t# Average: ", sum(radial_basis_function_prediction_times) / len(radial_basis_function_prediction_times))
-    print("\t### Accuracies ###")
-    print("\t\t# Minimum: ", min(radial_basis_function_prediction_accuracies))
-    print("\t\t# Maximum: ", max(radial_basis_function_prediction_accuracies))
-    print("\t\t# Average: ", sum(radial_basis_function_prediction_accuracies) / len(radial_basis_function_prediction_accuracies))
+        gamma_rbfc_average_training_times.append(np.mean(radial_basis_function_training_times))
+        gamma_rbfc_average_prediction_times.append(np.mean(radial_basis_function_prediction_times))
+        gamma_rbfc_average_accuracies.append(np.mean(radial_basis_function_prediction_accuracies))
+
+        print("\t##### Linear Kernel")
+        print("\t\t### Training Times (in ms) ###")
+        print("\t\t\t# Minimum: ", min(linear_kernel_training_times))
+        print("\t\t\t# Maximum: ", max(linear_kernel_training_times))
+        print("\t\t\t# Average: ", np.mean(linear_kernel_training_times))
+        print("\t\t### Prediction Times (in ms) ###")
+        print("\t\t\t# Minimum: ", min(linear_kernel_prediction_times))
+        print("\t\t\t# Maximum: ", max(linear_kernel_prediction_times))
+        print("\t\t\t# Average: ", np.mean(linear_kernel_prediction_times))
+        print("\t\t### Accuracies ###")
+        print("\t\t\t# Minimum: ", min(linear_kernel_prediction_accuracies))
+        print("\t\t\t# Maximum: ", max(linear_kernel_prediction_accuracies))
+        print("\t\t\t# Average: ", np.mean(linear_kernel_prediction_accuracies))
+        print("\t##### Radial Basis Function Kernel")
+        print("\t\t### Training Times (in ms) ###")
+        print("\t\t\t# Minimum: ", min(radial_basis_function_training_times))
+        print("\t\t\t# Maximum: ", max(radial_basis_function_training_times))
+        print("\t\t\t# Average: ", np.mean(radial_basis_function_training_times))
+        print("\t\t### Prediction Times (in ms) ###")
+        print("\t\t\t# Minimum: ", min(radial_basis_function_prediction_times))
+        print("\t\t\t# Maximum: ", max(radial_basis_function_prediction_times))
+        print("\t\t\t# Average: ", np.mean(radial_basis_function_prediction_times))
+        print("\t\t### Accuracies ###")
+        print("\t\t\t# Minimum: ", min(radial_basis_function_prediction_accuracies))
+        print("\t\t\t# Maximum: ", max(radial_basis_function_prediction_accuracies))
+        print("\t\t\t# Average: ", np.mean(radial_basis_function_prediction_accuracies))
+
+    print("##### Summary of gammas for radial basis function #####")
+    print("\t# Average training times for each gamma:", gamma_rbfc_average_training_times)
+    print("\t# Average predicting times for each gamma:", gamma_rbfc_average_prediction_times)
+    print("\t# Average accuracies for each gamma:", gamma_rbfc_average_accuracies)
+    print("\t# Best gamma in terms of training time:", gamma_rbfc_average_training_times.index(min(gamma_rbfc_average_training_times)) + 1)  # Min because faster is better
+    print("\t# Best gamma in terms of predicting time:", gamma_rbfc_average_prediction_times.index(min(gamma_rbfc_average_prediction_times)) + 1)  # Min because faster is better
+    print("\t# Best gamma in terms of accuracy:", gamma_rbfc_average_accuracies.index(max(gamma_rbfc_average_accuracies)) + 1)  # Max because we want highest accuracy possible
 
 
 main()
