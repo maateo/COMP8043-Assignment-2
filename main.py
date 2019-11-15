@@ -40,7 +40,8 @@ def main():
     plt.show()
 
     # Parameterised data
-    feature_vectors_parameterised = feature_vectors.sample(3500)
+    number_of_samples = 400
+    feature_vectors_parameterised = feature_vectors.sample(number_of_samples)
     labels_parameterised = labels[feature_vectors_parameterised.index]
 
     # Print parameterised statistics
@@ -102,10 +103,18 @@ def main():
     print("# Minimum: ", min(perceptron_training_times))
     print("# Maximum: ", max(perceptron_training_times))
     print("# Average: ", np.mean(perceptron_training_times))
+    print("### Training Times (in ms) per sample ###")
+    print("# Minimum: ", np.divide(min(perceptron_training_times), number_of_samples))
+    print("# Maximum: ", np.divide(max(perceptron_training_times), number_of_samples))
+    print("# Average: ", np.divide(np.mean(perceptron_training_times), number_of_samples))
     print("### Prediction Times (in ms) ###")
     print("# Minimum: ", min(perceptron_prediction_times))
     print("# Maximum: ", max(perceptron_prediction_times))
     print("# Average: ", np.mean(perceptron_prediction_times))
+    print("### Prediction Times (in ms) per sample ###")
+    print("# Minimum: ", np.divide(min(perceptron_prediction_times), number_of_samples))
+    print("# Maximum: ", np.divide(max(perceptron_prediction_times), number_of_samples))
+    print("# Average: ", np.divide(np.mean(perceptron_prediction_times), number_of_samples))
     print("### Accuracies ###")
     print("# Minimum: ", min(perceptron_prediction_accuracies))
     print("# Maximum: ", max(perceptron_prediction_accuracies))
@@ -202,10 +211,18 @@ def main():
         print("\t\t\t# Minimum: ", min(linear_kernel_training_times))
         print("\t\t\t# Maximum: ", max(linear_kernel_training_times))
         print("\t\t\t# Average: ", np.mean(linear_kernel_training_times))
+        print("\t\t### Training Times (in ms) per sample ###")
+        print("\t\t\t# Minimum: ", np.divide(min(linear_kernel_training_times),number_of_samples))
+        print("\t\t\t# Maximum: ", np.divide(max(linear_kernel_training_times),number_of_samples))
+        print("\t\t\t# Average: ", np.divide(np.mean(linear_kernel_training_times),number_of_samples))
         print("\t\t### Prediction Times (in ms) ###")
         print("\t\t\t# Minimum: ", min(linear_kernel_prediction_times))
         print("\t\t\t# Maximum: ", max(linear_kernel_prediction_times))
         print("\t\t\t# Average: ", np.mean(linear_kernel_prediction_times))
+        print("\t\t### Prediction Times (in ms) per sample ###")
+        print("\t\t\t# Minimum: ", np.divide(min(linear_kernel_prediction_times), number_of_samples))
+        print("\t\t\t# Maximum: ", np.divide(max(linear_kernel_prediction_times),number_of_samples))
+        print("\t\t\t# Average: ", np.divide(np.mean(linear_kernel_prediction_times), number_of_samples))
         print("\t\t### Accuracies ###")
         print("\t\t\t# Minimum: ", min(linear_kernel_prediction_accuracies))
         print("\t\t\t# Maximum: ", max(linear_kernel_prediction_accuracies))
