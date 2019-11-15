@@ -121,12 +121,6 @@ def main():
     print("# Radial Basis Function #")
     print("#  Number of kfolds: %d  #" % number_of_kfolds)
     print("#########################")
-    linear_kernel_training_times = []
-    linear_kernel_prediction_times = []
-    linear_kernel_prediction_accuracies = []
-    radial_basis_function_training_times = []
-    radial_basis_function_prediction_times = []
-    radial_basis_function_prediction_accuracies = []
 
     gamma_rbfc_average_training_times = []
     gamma_rbfc_average_prediction_times = []
@@ -135,6 +129,14 @@ def main():
     kf = model_selection.KFold(n_splits=number_of_kfolds, shuffle=True)
     for gamma in range(1, 16):
         print("##### Gamma: %d" % gamma)
+
+        linear_kernel_training_times = []
+        linear_kernel_prediction_times = []
+        linear_kernel_prediction_accuracies = []
+        radial_basis_function_training_times = []
+        radial_basis_function_prediction_times = []
+        radial_basis_function_prediction_accuracies = []
+
         current_fold = 0
         for train_index, test_index in kf.split(feature_vectors_parameterised, labels_parameterised):
             current_fold += 1
@@ -177,7 +179,7 @@ def main():
             print("\t\t\t# Linear Kernel")
             print("\t\t\t\t# Training time", linear_kernel_fit_end_time - linear_kernel_fit_start_time)
             print("\t\t\t\t# Predicting time", linear_kernel_predict_end_time - linear_kernel_predict_start_time)
-            print("\t\t\t\t# Perceptron accuracy score: ", linear_kernel_accuracy_score)
+            print("\t\t\t\t# Linear Kernel accuracy score: ", linear_kernel_accuracy_score)
             print("\t\t\t\t# true negative", l_true_negative)
             print("\t\t\t\t# false positive", l_false_positive)
             print("\t\t\t\t# false negative", l_false_negative)
@@ -185,7 +187,7 @@ def main():
             print("\t\t\t# Radial Basis Function Kernel")
             print("\t\t\t\t# Training time", radial_basis_function_fit_end_time - radial_basis_function_fit_start_time)
             print("\t\t\t\t# Predicting time", radial_basis_function_predict_end_time - radial_basis_function_predict_start_time)
-            print("\t\t\t\t# Perceptron accuracy score: ", radial_basis_function_accuracy_score)
+            print("\t\t\t\t# RBF Kernel accuracy score: ", radial_basis_function_accuracy_score)
             print("\t\t\t\t# true negative", rbf_true_negative)
             print("\t\t\t\t# false positive", rbf_false_positive)
             print("\t\t\t\t# false negative", rbf_false_negative)
